@@ -19,12 +19,13 @@ class MycroftSkillsManager(object):
     DEFAULT_SKILLS_DIR = "/opt/mycroft/skills"
 
     def __init__(self, platform='default', skills_dir=None, repo=None,
-                 versioned=True):
+                 versioned=True, pool_size=None):
         self.platform = platform
         self.skills_dir = expanduser(skills_dir or '') \
             or self.DEFAULT_SKILLS_DIR
         self.repo = repo or SkillRepo()
         self.versioned = versioned
+        self.pool_size = pool_size or 100
 
     def install(self, param, author=None):
         """Install by url or name"""
@@ -57,7 +58,7 @@ class MycroftSkillsManager(object):
                 LOG.exception('Error running {} on {}:'.format(
                     func.__name__, skill.name
                 ))
-        return all(ThreadPool(100).map(run_item, skills))
+        return all(ThreadPool(self.pool_size).map(run_item, skills))
 
     def install_defaults(self):
         """Installs the default skills, updates all others"""
